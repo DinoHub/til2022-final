@@ -1,0 +1,41 @@
+---
+# network
+host: '0.0.0.0'
+port: 5566
+
+# map
+map_file: 'map.png'
+map_scale: 0.01
+
+# display
+robot_radius: 10
+
+# simulation
+start_pose:
+  x: 2.0
+  y: 2.0
+  z: 0.0
+use_noisy_pose: True
+robot_phy_length: 0.32
+pos_noise_stddev: 0.05
+
+# localization proxy
+proxy_real_robot: False
+proxy_host: 'localhost'
+proxy_port: 5567
+
+# logging
+log_level: 'debug'
+
+# clues
+clues:
+  - clue_id:  1
+    trigger:
+      x: 2.0
+      y: 2.0
+      r: 1.0
+    location:
+      x: 6.5
+      y: 4.0
+    audio_file:
+      'SM4_F48_A0100.wav'
