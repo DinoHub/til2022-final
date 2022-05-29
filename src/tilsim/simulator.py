@@ -312,7 +312,7 @@ def main():
 
     grp_net = parser.add_argument_group('Network configuration')
     grp_net.add_argument('-i', '--host', metavar='host', type=str, required=False, help='Server hostname or IP address. (Default: 0.0.0.0)')
-    grp_net.add_argument('-p', '--port', metavar='port', type=str, required=False, help='Server port number. (Default: 5566)')
+    grp_net.add_argument('-p', '--port', metavar='port', type=int, required=False, help='Server port number. (Default: 5566)')
 
     grp_proxy = parser.add_argument_group('Pose proxy configuration', description='Allow passthrough of robot pose from a localization server.')
     grp_proxy.add_argument('-q', '--proxy_real_robot', action='store_true', help='Proxy real robot pose.')
