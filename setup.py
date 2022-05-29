@@ -4,8 +4,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="til2022-final",
-    version="0.0.1",
+    name="til-final",
+    version="2022.0.1",
     author="Je Hon Tan",
     author_email="jehontan@gmail.com",
     description="Final robotics challenge for TIL2022",
