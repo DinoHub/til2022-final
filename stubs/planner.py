@@ -1,9 +1,7 @@
 from queue import PriorityQueue
 from typing import List, Tuple, TypeVar, Dict
-from localization import GridLocation, SignedDistanceGrid, RealLocation
+from tilsdk.localization import *
 import heapq
-
-from localization.types import euclidean_distance
 
 T = TypeVar('T')
 

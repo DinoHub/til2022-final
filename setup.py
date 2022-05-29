@@ -32,6 +32,7 @@ setuptools.setup(
         'urllib3 >= 1.25.8',
         'pyyaml >= 5.3',
         'librosa >= 0.9.1',
+        'tensorflow >= 2.8.0',
     ],
     entry_points = {
         'console_scripts': [

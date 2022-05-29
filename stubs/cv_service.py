@@ -1,5 +1,5 @@
 from typing import List
-from .types import *
+from tilsdk.cv.types import *
 import onnxruntime as ort
 import cv2
 import numpy as np
