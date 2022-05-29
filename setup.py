@@ -37,6 +37,7 @@ setuptools.setup(
     entry_points = {
         'console_scripts': [
             'til-simulator=tilsim.simulator:main',
+            'til-scoring=tilscoring.service:main',
         ]
     },
 )
