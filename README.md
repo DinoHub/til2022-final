@@ -1,2 +1,2 @@
-# til2022-final
+# til-final
 Final robotics challenge for TIL2022

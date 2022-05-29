@@ -11,9 +11,9 @@ setuptools.setup(
     description="Final robotics challenge for TIL2022",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jehontan/til2022-final",
+    url="https://github.com/jehontan/til-final",
     project_urls={
-        "Bug Tracker": "https://github.com/jehontan/til2022-final/issues",
+        "Bug Tracker": "https://github.com/jehontan/til-final/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
