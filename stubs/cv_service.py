@@ -6,10 +6,28 @@ import numpy as np
 
 class CVService:
     def __init__(self, model_dir):
+        '''
+        Parameters
+        ----------
+        model_dir : str
+            Path of model file to load.
+        '''
+
         self.session = ort.InferenceSession(model_dir, providers=["CUDAExecutionProvider"])
 
     def targets_from_image(self, img) -> List[DetectedObject]:
-        '''Process image and return targets.'''
+        '''Process image and return targets.
+        
+        Parameters
+        ----------
+        img : Any
+            Input image.
+        
+        Returns
+        -------
+        results  : List[DetectedObject]
+            Detected targets.
+        '''
         
         # preprocess img
         img_ = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

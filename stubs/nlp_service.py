@@ -8,12 +8,29 @@ import librosa
 import onnxruntime as ort
 
 class NLPService:
-    def __init__(self, model_dir):
-        '''Model loading.'''
+    def __init__(self, model_dir:str):
+        '''
+        Parameters
+        ----------
+        model_dir : str
+            Path of model file to load.
+        '''
         self.session = ort.InferenceSession(model_dir, providers=["CUDAExecutionProvider"])
 
     def locations_from_clues(self, clues:Iterable[Clue]) -> List[RealLocation]:
-        '''Process clues and get locations of interest.'''
+        '''Process clues and get locations of interest.
+        
+        Parameters
+        ----------
+        clues
+            Clues to process.
+
+        Returns
+        -------
+        lois
+            Locations of interest.
+        '''
+
         locations = []
         for c in clues:
             waveform, sr = sf.read(BytesIO(c.audio))
