@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 from tilsdk.cv.types import *
 import onnxruntime as ort
 import cv2

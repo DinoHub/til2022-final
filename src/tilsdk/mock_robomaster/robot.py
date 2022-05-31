@@ -1,7 +1,7 @@
 import urllib3
-from mock_robomaster.camera import Camera
+from .camera import Camera
 
-from mock_robomaster.chassis import Chassis
+from .chassis import Chassis
 
 class Robot:
     def __init__(self, host:str='localhost', port:int=5566):
@@ -12,5 +12,5 @@ class Robot:
         self.camera = Camera(self)
 
     def initialize(self, conn_type='ap', proto_type='udp'):
-        '''Does  nothing for mock.'''
+        '''Does nothing for mock.'''
         pass
