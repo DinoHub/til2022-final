@@ -21,8 +21,8 @@ logging.basicConfig(level=logging.INFO,
 REACHED_THRESHOLD_M = 0.2
 ANGLE_THRESHOLD_DEG = 20.0
 ROBOT_RADIUS_M = 0.2
-NLP_MODEL_DIR = 'nlp/nlp_model.onnx'
-CV_MODEL_DIR = 'cv/cv_model.onnx'
+NLP_MODEL_DIR = 'models/nlp_model.onnx'
+CV_MODEL_DIR = 'models/cv_model.onnx'
 
 # Convenience function to update locations of interest.
 def update_locations(old:List[RealLocation], new:List[RealLocation]) -> None:
@@ -35,10 +35,11 @@ def update_locations(old:List[RealLocation], new:List[RealLocation]) -> None:
 
 def main():
     # Initialize services
-    cv_service = CVService(CV_MODEL_DIR)
+    # cv_service = CVService(model_dir=CV_MODEL_DIR)
+    cv_service = MockCVService(model_dir=CV_MODEL_DIR)
     nlp_service = NLPService(model_dir=NLP_MODEL_DIR)
     loc_service = LocalizationService()
-    rep_service = ReportingService()
+    rep_service = ReportingService(host='localhost', port='5566')
     robot = Robot()
     robot.initialize(conn_type="ap")
     robot.camera.start_video_stream(display=False, resolution='720p')
@@ -71,13 +72,18 @@ def main():
         pose = pose_filter.update(pose)
         img = robot.camera.read_cv2_image(strategy='newest')
         
+        if not pose:
+            # now new data, continue to next iteration.
+            continue
+
         # Filter out clues that were seen before
         clues = filter(new_clues, clues)
 
         # Process clues using NLP and determine any new locations of interest
-        new_lois = nlp_service.locations_from_clues(clues)
-        update_locations(lois, new_lois)
-        seen_clues.update([c.clue_id for c in clues])
+        if clues:
+            new_lois = nlp_service.locations_from_clues(clues)
+            update_locations(lois, new_lois)
+            seen_clues.update([c.clue_id for c in clues])
 
         # Process image and detect targets
         targets = cv_service.targets_from_image(img)
@@ -118,6 +124,15 @@ def main():
                 dist_to_wp = euclidean_distance(pose, curr_wp)
                 ang_to_wp = np.degrees(np.arctan2(curr_wp[1]-pose[1], curr_wp[0]-pose[0]))
                 ang_diff = -(ang_to_wp - pose[2]) # body frame
+
+                # ensure ang_diff is in [-180, 180]
+                if ang_diff < -180:
+                    ang_diff += 360
+
+                if ang_diff > 180:
+                    ang_diff -= 360
+
+                logging.getLogger('Navigation').debug('ang_to_wp: {}, hdg: {}, ang_diff: {}'.format(ang_to_wp, pose[2], ang_diff))
 
                 # Consider waypoint reached if within a threshold distance
                 if dist_to_wp < REACHED_THRESHOLD_M:
