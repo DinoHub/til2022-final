@@ -7,10 +7,6 @@ from typing import List, Any
 from tilsdk.cv.types import DetectedObject
 from tilsdk.localization.types import RealPose
 
-logging.basicConfig(level=logging.INFO,
-                    format='[%(levelname)5s][%(asctime)s][%(name)s]: %(message)s',
-                    datefmt='%H:%M:%S')
-
 class ReportingService:
     '''Communicates with reporting server to submit target reports.'''
 

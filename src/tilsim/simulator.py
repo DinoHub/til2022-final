@@ -294,7 +294,6 @@ def draw_clues(ax):
     global config
 
     for clue in config.clues:
-        logging.getLogger('draw_clues').debug(clue)
         trigger_loc = RealLocation(clue['trigger']['x'], clue['trigger']['y'])
         r = clue['trigger']['r']
 
