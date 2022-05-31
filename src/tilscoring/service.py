@@ -111,7 +111,7 @@ def main():
     global lut
 
     parser = argparse.ArgumentParser(description='TIL Scoring Server.')
-    parser.add_argument('config', type=str, required=True, help='Target configuration JSON file.')
+    parser.add_argument('config', type=str, help='Target configuration JSON file.')
     parser.add_argument('-i', '--host', metavar='host', type=str, required=False, default='0.0.0.0', help='Server hostname or IP address. (Default: "0.0.0.0")')
     parser.add_argument('-p', '--port', metavar='port', type=int, required=False, default=5501, help='Server port number. (Default: 5501)')
     parser.add_argument('-ll', '--log', dest='log_level', metavar='level', type=str, required=False, default='info', help='Logging level. (Default: "info")')
