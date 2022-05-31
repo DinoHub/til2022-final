@@ -6,6 +6,7 @@ import logging
 import time
 from pathlib import Path
 from threading import Lock, Thread
+import cv2
 
 import flask
 import matplotlib.patches as mpatches
@@ -85,7 +86,6 @@ def post_cmd_vel():
         logging.getLogger('/cmd_vel').warning('Unknown request, ignoring...')
         return 'Bad request.', 400
 
-
     vel = (data['vel']['x'], data['vel']['y'], data['vel']['z'])
     robot.vel = vel
 
@@ -101,6 +101,21 @@ def post_report():
     
     return 'OK'
 
+@app.route('/camera', methods=['GET'])
+def get_camera():
+    global config, robot
+
+    logging.getLogger('/camera').info('Camera image requested.')
+
+    for target in config.targets:
+        loc = RealLocation(target['trigger']['x'], target['trigger']['y'])
+        if euclidean_distance(robot.pose, loc) <= target['trigger']['r']:
+            img = cv2.imread(target['image_file'], cv2.IMREAD_COLOR)
+            img = cv2.resize(img, (1280, 720))
+            buf = img.tobytes()
+            return buf, 200
+
+    return np.zeros((1280, 720, 3), dtype=np.uint8).tobytes(), 200
 
 def start_server():
     global config
@@ -277,21 +292,42 @@ def draw_robot(ax, refs=None, draw_noisy=False):
 
 def draw_clues(ax):
     global config
-    
-    refs = []
 
     for clue in config.clues:
         logging.getLogger('draw_clues').debug(clue)
-        loc = RealLocation(clue['trigger']['x'], clue['trigger']['y'])
+        trigger_loc = RealLocation(clue['trigger']['x'], clue['trigger']['y'])
         r = clue['trigger']['r']
+
+        trigger_loc = real_to_grid_exact(trigger_loc, config.map_scale)
+        r /= config.map_scale
+
+        circle = mpatches.Circle(trigger_loc, radius=r, color=to_rgba('yellow', alpha=0.2))
+        ax.add_artist(circle)
+
+        dest_loc = RealLocation(clue['location']['x'], clue['location']['y'])
+        dest_loc = real_to_grid_exact(dest_loc, config.map_scale)
+
+        ax.scatter(dest_loc[0], dest_loc[1], marker='x', color='yellow')
+
+        ax.annotate(clue['clue_id'], trigger_loc, color='yellow')
+        ax.annotate(clue['clue_id'], dest_loc, color='yellow')
+
+
+def draw_targets(ax):
+    global config
+
+    for target in config.targets:
+        logging.getLogger('draw_targets').debug(target)
+        loc = RealLocation(target['trigger']['x'], target['trigger']['y'])
+        r = target['trigger']['r']
 
         loc = real_to_grid_exact(loc, config.map_scale)
         r /= config.map_scale
 
-        circle = mpatches.Circle(loc, radius=r, color=to_rgba('yellow', alpha=0.2))
-        refs.append(ax.add_artist(circle))
+        circle = mpatches.Circle(loc, radius=r, color=to_rgba('green', alpha=0.2))
+        ax.add_artist(circle)
+        ax.annotate(target['target_id'], loc, color='green')
 
-    return refs
 
 def main():
     ##### Parse Args #####
@@ -343,7 +379,8 @@ def main():
         'proxy_host': 'localhost',
         'proxy_port': 5567,
         'log_level': 'info',
-        'clues': []
+        'clues': [],
+        'targets': [],
     }
 
     if args.config:
@@ -381,6 +418,7 @@ def main():
     map_img = plt.imread(config.map_file)
     plt.imshow(map_img)
     draw_clues(ax)
+    draw_targets(ax)
     draw_refs = draw_robot(ax)
     plt.ion()
     plt.draw()

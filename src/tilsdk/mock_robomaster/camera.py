@@ -1,4 +1,4 @@
-import cv2
+import numpy as np
 
 class Camera:
     '''Mock robomaster camera.'''
@@ -11,6 +11,8 @@ class Camera:
     def read_cv2_image(self, timeout:float=3, strategy:str='pipeline'):
         '''Read image from robot camera.
         
+        For mock, gets image from simulator.
+
         Parameters
         ----------
         timeout
@@ -27,8 +29,13 @@ class Camera:
         if not self._is_initialized:
             raise Exception('Camera stream not started.')
 
-        im = cv2.imread('fallen_man2.jpg', cv2.IMREAD_COLOR)
-        return im
+        response = self.manager.request(method='GET',
+                                        url=self.url+'/camera')
+
+        img = np.frombuffer(response.data, np.uint8)
+        img = img.reshape((720, 1280, 3))
+        
+        return img
 
     def start_video_stream(self, display:bool=True, resolution='720p'):
         self._is_initialized = True
