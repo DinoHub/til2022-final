@@ -394,7 +394,7 @@ def main():
 
     # update with args
     for key, value in vars(args).items():
-        if value is not None:
+        if (value is not None) and (key not in config.keys()):
             config[key] = value
 
     config = namedtuple('Config', config.keys())(*config.values())
