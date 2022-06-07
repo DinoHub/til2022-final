@@ -1,0 +1,31 @@
+{
+  "targets": {
+    "1": {
+      "id": "1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "priority": "n",
+      "cls": "1"
+    },
+    "2": {
+      "id": "2",
+      "x": 5,
+      "y": 5,
+      "z": 0,
+      "priority": "h",
+      "cls": "1"
+    }
+  },
+  "valid_range": 10,
+  "valid_time_s":5,
+  "score_per_penalty": 0.5,
+  "score_per_target": 10,
+  "priority_wt":2,
+  "max_runs":2,
+  "max_time_per_run_s":600,
+  "classes": {
+    "0": "Not Critical",
+    "1": "Critical"
+  }
+}
