@@ -26,23 +26,19 @@ The DJI Robomaster SDK allows control of the robot. See `DJI Robomaster SDK docu
 Localization Service
 ~~~~~~~~~~~~~~~~~~~~
 
-.. todo::
-    Improve clue description, specify what emotion is to be classified as high-priority.
-
 The localisation service provides the robot's real-time pose and any clues received
 at the robot's present location. Clues each comprise an audio file and an audio source
 location. The audio may indicate various emotions, and audio that indicate distress
-should be prioritised for investigation.
+(classified "angry" or "sad") should be prioritised for investigation.
 
 .. tip::
-    To use the SDK to obtain robot pose and clues see :py:meth:`localization.LocalizationService.get_pose`
+    To use the SDK to obtain robot pose and clues see :py:meth:`tilsdk.localization.LocalizationService.get_pose`
 
     Example:
 
     .. code-block:: python
 
-        from localization.localization_types import *
-        from localization import LocalizationService
+        from tilsdk.localization import *
 
         ...
 
@@ -105,14 +101,13 @@ an occupancy grid, where non-occupied (i.e. passable) cells are black and occupi
 retrieved once.
 
 .. tip:: 
-    To use the SDK to get the map, see :py:meth:`localization.LocalizationService.get_map`.
+    To use the SDK to get the map, see :py:meth:`tilsdk.localization.LocalizationService.get_map`.
 
     Example:
 
     .. code-block:: python
 
-        from localization.localization_types import *
-        from localization import LocalizationService
+        from tilsdk.localization import *
 
         ...
 
@@ -157,13 +152,13 @@ The reporting service allows the robot to report targets to human rescuers. For 
 purposes of the competition, the submissions to the report service are used for scoring.
 
 .. tip:: 
-    To use the SDK to report targets see :py:meth:`reporting.ReportingService.report`.
+    To use the SDK to report targets see :py:meth:`tilsdk.reporting.ReportingService.report`.
 
     Example:
 
     .. code-block:: python
 
-        from reporting import ReportingService
+        from tilsdk.reporting import ReportingService
 
         ...
 

@@ -21,7 +21,7 @@ to create and make reproducible. Simulation overcomes these challenges
 by reducing the need to perform physical tests, replacing them with tests
 in a configurable virtual environment.
 
-In this challenge a basic simulator (``simulator.py``) is available to you
+In this challenge a basic simulator (``til-simulator``) is available to you
 to assist you in testing your autonomy code. You are encouraged to design
 various test environments and test extensively in simulation as access to
 the physical challenge arena and robots prior to the actual challenge day

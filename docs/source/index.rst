@@ -6,6 +6,7 @@ TIL2022 Robotics Challenge's
    :caption: Contents:
 
    intro
+   install
    details
    definitions
    services

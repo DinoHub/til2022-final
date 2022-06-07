@@ -19,9 +19,17 @@ a pose. Figures that are shown laying down will be deemed high priorty and
 should be reported. Figures shown in other poses will be deemed low priority
 and should not be reported.
 
-.. todo:: Add figure to show example of laying down vs. otherwise.
+.. figure:: _static/img/fallen_sample.png
+    :align: center
+    :width: 300px
 
+    Example of fallen target that should be reported as high priority.
 
+.. figure:: _static/img/standing_sample.png
+    :align: center
+    :width: 300px
+
+    Example of standing target that should be reported as low priority.
 
 Challenge Setup
 ~~~~~~~~~~~~~~~
