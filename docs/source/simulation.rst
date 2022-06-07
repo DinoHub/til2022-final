@@ -40,13 +40,13 @@ The simulation setup is designed to closely replicate the physical challenge
 setup to allow you to test your autonomy code without any modification. This
 is accomplished by:
 
-1. Replicating the service endpoints using ``simulator.py``.
+1. Replicating the service endpoints using ``til-simulator``.
 2. Providing mock to facilitate isolating desired functions.
 
 Simulator
 ---------
 
-``simulator.py`` sets up endpoints with the same interface as the
+``til-simulator`` sets up endpoints with the same interface as the
 localization and reporting servers, allowing you to use the localization
 and reporting service from the SDK without modification as you would in the
 actual challenge. It accepts configuration options (see `simulator-configuration`)
@@ -58,7 +58,7 @@ localization server. This enables you to test with the physical robot and locali
 while using your own map and injecting your own clues.
 
 .. note::
-    ``simulator.py`` sets up the HTTP endpoints. When running the simulator locally
+    ``til-simulator`` sets up the HTTP endpoints. When running the simulator locally
     on your development machine, your default machine configuration may prevent the
     simulator from communicating with your autonomy code.
 
@@ -99,12 +99,10 @@ allowing you to reproduce test conditions and test edge cases.
 Simulator Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-``simulator.py`` should be run as a script. The simulator accepts a YAML config
-file and command line options for configuration. A sample config is provided in
-``sim_config.yml``. Available command line options can be viewed by running
-``python simulator.py --help``.
+The simulator accepts a YAML config file and command line options for configuration.
+A sample config is provided in ``config/sim_config.yml``. Available command line 
+options can be viewed by running ``til-simulator --help``.
 
 You may use different maps with the simulator. Maps should be provided as black
 and white images in PNG format. Free grid positions should be marked black and 
 obstacle positions should be marked white. Be sure to specify the map scale used.
-
