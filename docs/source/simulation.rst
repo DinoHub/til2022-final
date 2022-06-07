@@ -1,18 +1,6 @@
 Simulation & Testing
 ====================
 
-.. todo::
-    Describe importance of simulation
-
-    Explain use of mocks, mocks classes provided.
-
-    Describe how to setup and run simulator.
-
-    Describe how to use localization server with simulator.
-
-    Explain how to transition form simulation to real.
-
-
 Simulation is an integral part of the robotics development workflow.
 Robot software may be developed in parallel with hardware to speed 
 up development. There may be limited copies of the physical robot to
