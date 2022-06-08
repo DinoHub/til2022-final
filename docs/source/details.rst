@@ -15,21 +15,21 @@ To do so you will need to accomplish the following subtasks:
 
 Human survivors are represented as image targets mounted on vertical surfaces
 throughout the arena. These image targets will each display a human figure in 
-a pose. Figures that are shown laying down will be deemed high priorty and
-should be reported. Figures shown in other poses will be deemed low priority
-and should not be reported.
+poses, which can be classified into fallen or not fallen. Targets should be 
+reported with the correct classification to assist rescuers in prioritizing
+targets.
 
 .. figure:: _static/img/fallen_sample.png
     :align: center
     :width: 300px
 
-    Example of fallen target that should be reported as high priority.
+    Example of fallen target.
 
 .. figure:: _static/img/standing_sample.png
     :align: center
     :width: 300px
 
-    Example of standing target that should be reported as low priority.
+    Example of not fallen target.
 
 Challenge Setup
 ~~~~~~~~~~~~~~~
@@ -77,5 +77,21 @@ Scoring will be done using the :ref:`reporting-service`. Reports contain the
 image seen by the robot and the detected target bounding box, and will be used
 to confirm that the detected target is correct.
 
-.. todo:: 
-    Add details on scoring, penalties, etc.
++----------------------------+--------+
+| Item                       | Score  |
++============================+========+
+| Missed Target              | 0      |
++----------------------------+--------+
+| Correctly reported target  | 1      |
++----------------------------+--------+
+| Misreported target         | 0.5    |
++----------------------------+--------+
+
+You will be ranked based on your final score. Only the event of a tie, a tie-breaker
+score will be calculated as follows:
+
+.. code-block::
+
+    score = number_of_reported_targets / (time_of_last_report - start_time)
+
+The team with the higher tie-breaker score will be ranked higher.
