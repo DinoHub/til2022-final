@@ -58,3 +58,7 @@ class ReportingService:
                                         }))
 
         return response
+
+    def start_run(self):
+        response = self.manager.request(method='GET',
+                                        url=self.url+'/start_run')

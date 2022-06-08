@@ -44,6 +44,9 @@ def main():
     robot.initialize(conn_type="ap")
     robot.camera.start_video_stream(display=False, resolution='720p')
 
+    # Start the run
+    rep_service.start_run()
+
     # Initialize planner
     map_:SignedDistanceGrid = loc_service.get_map()
     map_ = map_.dilated(1.5*ROBOT_RADIUS_M/map_.scale)
