@@ -35,24 +35,26 @@ class ReportingService:
         targets
             Detected targets.
         '''
-
-        # throttle the submission to an acceptable rate (1?2? per s)
-        # # pipe the results
+        
         _, encoded_img = cv2.imencode('.png',img)
         base64_img = base64.b64encode(encoded_img).decode("utf-8")
-
-        # logging.getLogger('Reporting').info([t._asdict() for t in targets])
 
         response = self.manager.request(method='POST',
                                         url=self.url+'/report',
                                         headers={'Content-Type': 'application/json'},
                                         body=json.dumps({
-                                            'pose': pose,
-                                            'image':base64_img,
-                                            'targets': [t._asdict() for t in targets]
+                                            'pose': pose._asdict(),
+                                            'image': base64_img,
+                                            'targets': [{
+                                                'id': t.id,
+                                                'cls': t.cls,
+                                                'bbox': {
+                                                    'x': t.bbox[0],
+                                                    'y': t.bbox[1],
+                                                    'w': t.bbox[2],
+                                                    'h': t.bbox[3],
+                                                }
+                                            } for t in targets]
                                         }))
-        
 
-        # return json.loads(response.data.decode('utf-8'))
-        # print(response)
         return response

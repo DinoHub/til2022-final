@@ -6,7 +6,8 @@ import base64
 import cv2
 import logging
 from collections import defaultdict
-from tilsdk.localization.types import euclidean_distance
+from tilsdk.cv.types import BoundingBox, DetectedObject
+from tilsdk.localization.types import *
 import datetime
 
 app = flask.Flask(__name__) 
@@ -28,12 +29,21 @@ def post_report():
 
     # parse JSON data
     data = json.loads(flask.request.data)
-    bin_data = base64.b64decode(data['image'])
-    np_img = np.asarray(bytearray(bin_data), dtype=np.uint8)
-    final_img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+    
+    img_data = base64.b64decode(data['image'])
+    np_img = np.asarray(bytearray(img_data), dtype=np.uint8)
+    image = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+
+    pose = RealPose(**data['pose'])
+
+    targets = [DetectedObject(
+        id = t['id'],
+        cls = t['cls'],
+        bbox = BoundingBox(**t['bbox'])
+    ) for t in data['targets']]
 
     # detect markers in image
-    corners, ids, _ = cv2.aruco.detectMarkers(final_img, aruco_dict, parameters=aruco_params)
+    corners, ids, _ = cv2.aruco.detectMarkers(image, aruco_dict, parameters=aruco_params)
 
     if corners:
         ids = set(ids.flatten())
