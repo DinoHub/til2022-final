@@ -1,4 +1,4 @@
-import pickle
+import shelve
 import flask
 import argparse
 import json
@@ -26,7 +26,7 @@ start_time = None
 run_id = 0
 image_cnt = 0
 out_dir = ''
-out_file = None
+out_file:shelve.Shelf = None
 
 ##### Flask server #####
 
@@ -44,8 +44,8 @@ def get_start_run():
 
     if out_file:
         out_file.close()
-
-    out_file = open(os.path.join(out_dir, 'run_{}.pk'.format(run_id)), 'wb')
+    
+    out_file = shelve.open(os.path.join(out_dir, 'run_{}.shelve'.format(run_id)), protocol=4)
 
     logging.getLogger('Scoring').info('========== Run started, ID: {} =========='.format(run_id))
 
@@ -114,7 +114,8 @@ def post_report():
                 report.image_in_config = False
 
     # dump report to pickle file
-    pickle.dump(report, out_file)
+    out_file[str(report.id)] = report
+
 
     # TODO: send result to API to be broadcasted 
     # send to PICO

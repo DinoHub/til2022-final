@@ -33,11 +33,13 @@ setuptools.setup(
         'pyyaml >= 5.3',
         'librosa >= 0.9.1',
         'tensorflow >= 2.8.0',
+        'termcolor'
     ],
     entry_points = {
         'console_scripts': [
             'til-simulator=tilsim.simulator:main',
             'til-scoring=tilscoring.service:main',
+            'til-judge=tilscoring.visualizer:main',
         ]
     },
 )

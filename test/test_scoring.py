@@ -3,8 +3,8 @@ from tilsdk.localization.types import *
 from tilsdk.cv.types import *
 import cv2
 
-pos_target = DetectedObject(1337, 1, BoundingBox(1,2,3,4))
-neg_target = DetectedObject(1338, 0, BoundingBox(1,2,3,4))
+pos_target = DetectedObject(1337, 1, BoundingBox(200,200,200,200))
+neg_target = DetectedObject(1338, 0, BoundingBox(200,200,200,200))
 
 good_pose = RealPose(3,7,0)
 bad_pose = RealPose(20,20,0)
