@@ -1,0 +1,40 @@
+---
+# scoring parameters
+valid_range_m: 1.0
+valid_time_s: 1.0
+max_time_per_run_s: 10.0
+
+correct_score: 1.0
+wrong_score: 0.5
+missed_score: 0.0
+
+# targets
+targets:
+  1:
+    id: 1
+    cls: 1
+    pose:
+      x: 0
+      y: 0
+      z: 0
+  2:
+    id: 2
+    cls: 1
+    pose:
+      x: 0
+      y: 0
+      z: 0
+  3:
+    id: 3
+    cls: 1
+    pose:
+      x: 0
+      y: 0
+      z: 0
+  4:
+    id: 4
+    cls: 1
+    pose:
+      x: 3
+      y: 7
+      z: 0
