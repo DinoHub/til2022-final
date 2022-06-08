@@ -1,8 +1,9 @@
+import pickle
 import flask
 import argparse
 import json
 import numpy as np
-import base64
+import yaml
 import cv2
 import logging
 from collections import defaultdict
@@ -10,6 +11,8 @@ from tilsdk.cv.types import BoundingBox, DetectedObject
 from tilsdk.localization.types import *
 from datetime import datetime
 import os
+from werkzeug.serving import WSGIRequestHandler
+from scoring_types import *
 
 app = flask.Flask(__name__) 
 
@@ -17,23 +20,32 @@ aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_1000) # use different f
 aruco_params = cv2.aruco.DetectorParameters_create()
 
 valid_history = []
-last_submitted = defaultdict(int) # maps image_id to last submitted class
+last_submitted = defaultdict(int) # maps image_id to tuple(last submitted class, report)
 config = {}
 start_time = None
 run_id = 0
 image_cnt = 0
 out_dir = ''
+out_file = None
 
 ##### Flask server #####
 
+# Flask defaults to HTTP 1.0. Use HTTP 1.1 to keep connections alive for high freqeuncy requests.
+WSGIRequestHandler.protocol_version = 'HTTP/1.1'
+
 @app.route('/start_run', methods=['GET'])
 def get_start_run():
-    global start_time, valid_history, last_submitted, run_id, image_cnt
-    start_time = datetime.now().timestamp()
+    global start_time, valid_history, last_submitted, run_id, image_cnt, out_file, out_dir
+    start_time = datetime.now()
     valid_history = []
     last_submitted = defaultdict(int)
-    run_id = np.random.randint(10000)
+    run_id = start_time.strftime('%H%M%S')
     image_cnt = 0
+
+    if out_file:
+        out_file.close()
+
+    out_file = open(os.path.join(out_dir, 'run_{}.pk'.format(run_id)), 'wb')
 
     logging.getLogger('Scoring').info('========== Run started, ID: {} =========='.format(run_id))
 
@@ -41,68 +53,57 @@ def get_start_run():
 
 @app.route('/report', methods=['POST'])
 def post_report():
-    global valid_history, last_submitted, start_time, image_cnt
+    global valid_history, last_submitted, start_time, image_cnt, out_file
 
-    recv_time = datetime.now().timestamp()
+    recv_time = datetime.now()
 
+    # rejection conditions
     if not start_time:
         logging.getLogger('Scoring').error('Report received but run not started.')
         return 'Run not started', 400
 
-    if recv_time - start_time > config['max_time_per_run_s']:
+    if (recv_time - start_time).total_seconds() > config['max_time_per_run_s']:
         logging.getLogger('Scoring').error('Report received outside max run time.')
         return 'Outside max run time', 400
 
-    logging.getLogger('Scoring').info('Report received: {}'.format(recv_time))
-
     # parse JSON data
-    data = json.loads(flask.request.data)
-    
-    img_data = base64.b64decode(data['image'])
-    np_img = np.asarray(bytearray(img_data), dtype=np.uint8)
-    image = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+    report = Report.from_json(flask.request.data, id=recv_time.timestamp(), timestamp=recv_time)
 
-    image_fn = os.path.join(out_dir, '{}_{:05d}.png'.format(run_id, image_cnt))
-    logging.getLogger('Scoring').info('Image file: {}'.format(image_fn))
-    cv2.imwrite(image_fn, image)
-    image_cnt += 1
-
-    reported_pose = RealPose(**data['pose'])
-
-    reported_targets = [DetectedObject(
-        id = t['id'],
-        cls = t['cls'],
-        bbox = BoundingBox(**t['bbox'])
-    ) for t in data['targets']]
+    logging.getLogger('Scoring').info('Report received: {}'.format(report.id))
 
     # detect markers in image
-    corners, image_ids, _ = cv2.aruco.detectMarkers(image, aruco_dict, parameters=aruco_params)
+    corners, image_ids, _ = cv2.aruco.detectMarkers(report.image, aruco_dict, parameters=aruco_params)
 
     if not corners:
         # no markers seen
         logging.getLogger('Scoring').warning('No image marker detected!')
+        report.marker_detected = False
     else:
         image_ids = set(image_ids.flatten())
         
         if len(image_ids) > 1:
             logging.getLogger('Scoring').warning('More than 1 target image reported!')
         else:
+            report.marker_detected = True
+
             (image_id,) = image_ids
-            image_id = str(image_id)
-            actual_target = config['targets'][image_id]
+            report.image_id = image_id
+
+            actual_target = config['targets'][image_id] # TODO
+            
 
             if actual_target:
-                actual_target_pose = RealPose(**actual_target['pose'])
+                report.image_in_config = True
 
-                if check_valid(reported_pose, actual_target_pose):
+                if check_valid(report, actual_target):
                     logging.getLogger('Scoring').info('Report is valid.')
 
-                    for target in reported_targets:
+                    for target in report.targets:
                         valid_history.append((recv_time, target))
-                        last_submitted[image_id] = target.cls
+                        last_submitted[image_id] = (target.cls, report.id) ####### TODO
 
                     curr_score = calculate_score()
-                    tie_score = len(last_submitted.keys())/(recv_time - start_time)
+                    tie_score = len(last_submitted.keys())/(recv_time - start_time).total_seconds() # TODO: verify
 
                     logging.getLogger('Scoring').info('Current Score: {}'.format(curr_score))
                     logging.getLogger('Scoring').info('Tie-breaker Score: {}'.format(tie_score))
@@ -110,47 +111,69 @@ def post_report():
                     logging.getLogger('Scoring').warning('Report is not valid.')
             else:
                 logging.getLogger('Scoring').warning('Reported image not in config.')
+                report.image_in_config = False
 
-
+    # dump report to pickle file
+    pickle.dump(report, out_file)
 
     # TODO: send result to API to be broadcasted 
     # send to PICO
 
     return {'response': True}
 
-def check_valid(curr_pose:RealPose, target_pose):
+def check_valid(report:Report, actual_target) -> bool:
+    '''Check if report is valid.'''
+
     global valid_history, config
+
+    report.range_valid = True
+    report.time_valid = True
+
+    actual_target_pose = RealPose(**actual_target['pose'])
 
     # check for distance from target 
     # data structure for currpose is in list form
-    if euclidean_distance(curr_pose, target_pose) > config['valid_range_m']:
+    if euclidean_distance(report.pose, actual_target_pose) > config['valid_range_m']:
         logging.getLogger('Scoring').debug('Out of physical range.')
-        return False
+        report.range_valid = False
 
     # last known attempt was within the valid_time 
     if len(valid_history) != 0:
         prev_time = valid_history[-1][0]
-        if datetime.now().timestamp() - prev_time < config['valid_time_s']:
+        if (report.timestamp - prev_time).total_seconds() < config['valid_time_s']:
             logging.getLogger('Scoring').debug('Within time range.')
-            return False
+            report.time_valid = False
 
-    return True 
+    return report.range_valid and report.time_valid
 
 def calculate_score():
     global config, last_submitted
 
     score = 0
 
-    for actual_target in config['targets']:
-        if actual_target in last_submitted:
-            logging.getLogger('Scoring').debug('Classes:  actual: {}, reported: {}'.format(config['targets'][actual_target]['cls'], last_submitted[actual_target]))
+    for actual_target_id in config['targets']:
+        actual_target = config['targets'][actual_target_id]
+        if actual_target['id'] in last_submitted:
+            reported_cls, report_id = last_submitted[actual_target_id]
 
-            if config['targets'][actual_target]['cls'] == str(last_submitted[actual_target]):
-                score += config['correct_score']
+            if actual_target['cls'] == reported_cls:
+                dscore = config['correct_score']
             else:
-                score += config['wrong_score']
+                dscore = config['wrong_score']
+
+            logging.getLogger('Scoring.calculate_score').info(
+                'Target {}: actual: {}, reported: {}, report_id: {}, score: {}'.format(
+                    actual_target['id'],
+                    actual_target['cls'],
+                    reported_cls,
+                    report_id,
+                    dscore
+                ))
+            score += dscore
         else:
             score += config['missed_score']
+    
+    logging.getLogger('Scoring.calculate_score').info('Total score: {}'.format(score))        
 
     return score
 
@@ -158,7 +181,7 @@ def main():
     global config, out_dir
 
     parser = argparse.ArgumentParser(description='TIL Scoring Server.')
-    parser.add_argument('config', type=str, help='Target configuration JSON file.')
+    parser.add_argument('config', type=str, help='Scoring configuration YAML file.')
     parser.add_argument('-i', '--host', metavar='host', type=str, required=False, default='0.0.0.0', help='Server hostname or IP address. (Default: "0.0.0.0")')
     parser.add_argument('-p', '--port', metavar='port', type=int, required=False, default=5501, help='Server port number. (Default: 5501)')
     parser.add_argument('-o', '--out_dir', dest='out_dir', type=str, required=False, default='./scoring', help='Scoring output directory.')
@@ -188,7 +211,7 @@ def main():
                     ])
 
     with open(args.config, 'r') as f:
-        config = json.load(f)
+        config = yaml.safe_load(f)
 
     app.run(args.host, args.port)
 
