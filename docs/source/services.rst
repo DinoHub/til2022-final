@@ -67,9 +67,9 @@ shall return a JSON object (Content-Type ``application/json``) of the following 
         },
         "clues": [
             {
-                "id": 1
+                "id": 1,
                 "location": {
-                    "x": 4.0
+                    "x": 4.0,
                     "y": 5.0
                 },
                 "audio": "Q29uZ3JhdHVsYXRpb25zLCB5b3UgZm91bmQgYW4gRWFzdGVyIEVnZyE="
@@ -182,14 +182,14 @@ message body (Content-Type ``application/json``) of the following schema:
 
     {
         "pose": {
-            "x": 1.0
-            "y": 2.0
+            "x": 1.0,
+            "y": 2.0,
             "z": 3.0
         },
         "image": "Q29uZ3JhdHVsYXRpb25zLCB5b3UgZm91bmQgYW4gRWFzdGVyIEVnZyE=",
         "targets": [
             {
-                "id": 1
+                "id": 1,
                 "cls": "fallen",
                 "bbox": {
                     "x": 300.0, 
