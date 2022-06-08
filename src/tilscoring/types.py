@@ -50,9 +50,14 @@ class Report:
         '''Get image with target bboxes drawn.'''
         img = self.image.copy()
         for target in self.targets:
-            pt1 = (target.x-target.w/2, target.y-target.h/2)
-            pt2 = (target.x+target.w/2, target.y+target.h/2)
-            img = cv2.rectangle(self.image, pt1, pt2, color=(0,0,255))
+            if target.cls == 0:
+                color=(0,0,255) # red
+            elif target.cls == 1:
+                color=(0,255,0) # green
+            bbox = target.bbox
+            pt1 = (round(bbox.x-bbox.w/2), round(bbox.y-bbox.h/2))
+            pt2 = (round(bbox.x+bbox.w/2), round(bbox.y+bbox.h/2))
+            img = cv2.rectangle(self.image, pt1, pt2, color=color)
 
         return img
 

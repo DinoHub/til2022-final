@@ -12,7 +12,7 @@ from tilsdk.localization.types import *
 from datetime import datetime
 import os
 from werkzeug.serving import WSGIRequestHandler
-from scoring_types import *
+from .types import *
 
 app = flask.Flask(__name__) 
 
