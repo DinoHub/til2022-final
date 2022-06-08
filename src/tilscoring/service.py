@@ -9,6 +9,7 @@ from collections import defaultdict
 from tilsdk.cv.types import BoundingBox, DetectedObject
 from tilsdk.localization.types import *
 from datetime import datetime
+import os
 
 app = flask.Flask(__name__) 
 
@@ -19,23 +20,28 @@ valid_history = []
 last_submitted = defaultdict(int) # maps image_id to last submitted class
 config = {}
 start_time = None
+run_id = 0
+image_cnt = 0
+out_dir = ''
 
 ##### Flask server #####
 
 @app.route('/start_run', methods=['GET'])
 def get_start_run():
-    global start_time, valid_history, last_submitted
+    global start_time, valid_history, last_submitted, run_id, image_cnt
     start_time = datetime.now().timestamp()
     valid_history = []
     last_submitted = defaultdict(int)
+    run_id = np.random.randint(10000)
+    image_cnt = 0
 
-    logging.getLogger('Scoring').info('===== Run started: {} ====='.format(start_time))
+    logging.getLogger('Scoring').info('========== Run started, ID: {} =========='.format(run_id))
 
     return 'OK', 200
 
 @app.route('/report', methods=['POST'])
 def post_report():
-    global valid_history, last_submitted, start_time
+    global valid_history, last_submitted, start_time, image_cnt
 
     recv_time = datetime.now().timestamp()
 
@@ -55,6 +61,11 @@ def post_report():
     img_data = base64.b64decode(data['image'])
     np_img = np.asarray(bytearray(img_data), dtype=np.uint8)
     image = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+
+    image_fn = os.path.join(out_dir, '{}_{:05d}.png'.format(run_id, image_cnt))
+    logging.getLogger('Scoring').info('Image file: {}'.format(image_fn))
+    cv2.imwrite(image_fn, image)
+    image_cnt += 1
 
     reported_pose = RealPose(**data['pose'])
 
@@ -144,16 +155,19 @@ def calculate_score():
     return score
 
 def main():
-    global config
+    global config, out_dir
 
     parser = argparse.ArgumentParser(description='TIL Scoring Server.')
     parser.add_argument('config', type=str, help='Target configuration JSON file.')
     parser.add_argument('-i', '--host', metavar='host', type=str, required=False, default='0.0.0.0', help='Server hostname or IP address. (Default: "0.0.0.0")')
     parser.add_argument('-p', '--port', metavar='port', type=int, required=False, default=5501, help='Server port number. (Default: 5501)')
-    parser.add_argument('-o', '--out_file', dest='out_file', type=str, required=False, default='scoring_log.txt', help='Scoring output file.')
+    parser.add_argument('-o', '--out_dir', dest='out_dir', type=str, required=False, default='./scoring', help='Scoring output directory.')
     parser.add_argument('-ll', '--log', dest='log_level', metavar='level', type=str, required=False, default='info', help='Logging level. (Default: "info")')
     args = parser.parse_args()
 
+    out_dir = args.out_dir
+
+    os.makedirs(out_dir, exist_ok=True)
 
     ##### Setup logging #####
     map_log_level = {
@@ -170,7 +184,7 @@ def main():
                     datefmt='%H:%M:%S',
                     handlers=[
                         logging.StreamHandler(),
-                        logging.FileHandler(args.out_file)
+                        logging.FileHandler(os.path.join(out_dir, 'scoring_log.txt'))
                     ])
 
     with open(args.config, 'r') as f:
