@@ -13,23 +13,27 @@ def main():
     shelf = shelve.open(args.filename, 'r', protocol=4)
 
     keys = sorted(shelf.keys())
+    num_reports = len(keys)
     ind = 0
+
+    cv2.namedWindow("Preview", cv2.WINDOW_NORMAL)
 
     while True:
         report = shelf[keys[ind]]
 
         print(
+            '[{:4d}/{:4d}]\t'.format(ind+1, num_reports),
             'id: ' + str(report.id) + '\t',
             't: '+ report.timestamp.isoformat() + '\t',
-            'img_id: {:3d}'.format(report.image_id) + '\t',
-            'd: {:6.2f}'.format(euclidean_distance(report.pose, report.actual_pose)) + '\t',
+            'img_id: {:2d}'.format(report.image_id) + '\t',
+            'd: {:5.2f}'.format(euclidean_distance(report.pose, report.actual_pose)) + '\t',
             colored('image_in_config', 'green' if report.image_in_config else 'red') + '\t',
             colored('time_valid', 'green' if report.time_valid else 'red') + '\t',
             colored('range_valid', 'green' if report.range_valid else 'red') + '\t',
         )
 
-        cv2.imshow('Preview', report.get_annotated())
-        k = cv2.waitKey(0)
+        cv2.imshow('Preview', report.get_annotated(3))
+        k = cv2.waitKey(0) & 0xFF
         
         if k == 81:
             ind -= 1

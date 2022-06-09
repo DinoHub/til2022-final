@@ -46,7 +46,7 @@ class Report:
         return report
 
 
-    def get_annotated(self):
+    def get_annotated(self, thickness:int=1):
         '''Get image with target bboxes drawn.'''
         img = self.image.copy()
         for target in self.targets:
@@ -57,7 +57,7 @@ class Report:
             bbox = target.bbox
             pt1 = (round(bbox.x-bbox.w/2), round(bbox.y-bbox.h/2))
             pt2 = (round(bbox.x+bbox.w/2), round(bbox.y+bbox.h/2))
-            img = cv2.rectangle(self.image, pt1, pt2, color=color)
+            img = cv2.rectangle(self.image, pt1, pt2, color=color, thickness=thickness)
 
         return img
 
