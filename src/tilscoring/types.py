@@ -10,7 +10,7 @@ import base64
 @dataclass
 class Report:
     # from JSON
-    id: int
+    id: str
     timestamp: datetime
     pose: RealPose
     image: Any # cv2 image
