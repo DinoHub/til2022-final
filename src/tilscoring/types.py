@@ -54,6 +54,8 @@ class Report:
                 color=(0,0,255) # red
             elif target.cls == 1:
                 color=(0,255,0) # green
+            else:
+                color=(255,0,0) # blue, unknown
             bbox = target.bbox
             pt1 = (round(bbox.x-bbox.w/2), round(bbox.y-bbox.h/2))
             pt2 = (round(bbox.x+bbox.w/2), round(bbox.y+bbox.h/2))
