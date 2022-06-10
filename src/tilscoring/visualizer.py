@@ -13,8 +13,6 @@ def main():
 
     shelf = shelve.open(args.filename, 'r', protocol=4)
 
-    print(list(shelf.keys()))
-
     latest_score_record:dict = shelf['latest_scores']
 
     scored_image_ids = sorted(latest_score_record.keys())
