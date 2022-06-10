@@ -1,4 +1,5 @@
 import shelve
+from time import strftime
 import flask
 import argparse
 import json
@@ -148,9 +149,11 @@ def check_valid(report:Report, actual_target) -> bool:
     return report.range_valid and report.time_valid
 
 def calculate_score():
-    global config, last_submitted
+    global config, last_submitted, out_file
 
     score = 0
+
+    score_entry = dict() # maps image id to the report used and score for report.
 
     for actual_target_id in config['targets']:
         actual_target = config['targets'][actual_target_id]
@@ -170,10 +173,22 @@ def calculate_score():
                     report_id,
                     dscore
                 ))
+
+            # record image score
+            score_entry[actual_target['id']] = {
+                'report_id': report_id,
+                'dscore': dscore
+            }
+
             score += dscore
         else:
             score += config['missed_score']
     
+    # write scores to file
+    if not 'latest_scores' in out_file.keys():
+        out_file['latest_scores'] = dict()
+    out_file['latest_scores'] = score_entry
+
     logging.getLogger('Scoring.calculate_score').info('Total score: {}'.format(score))        
 
     return score
