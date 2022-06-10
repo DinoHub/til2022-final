@@ -146,6 +146,9 @@ def main():
                 
                 # Determine velocity commands given distance and heading to waypoint
                 vel_cmd = tracker.update((dist_to_wp, ang_diff))
+
+                # reduce x velocity
+                vel_cmd[0] *= np.cos(np.radians(ang_diff))
                 
                 # If robot is facing the wrong direction, turn to face waypoint first before
                 # moving forward.
