@@ -3,11 +3,11 @@ from typing import List
 
 from tilsdk import *                                            # import the SDK
 from tilsdk.utilities import PIDController, SimpleMovingAverage # import optional useful things
-from tilsdk.mock_robomaster.robot import Robot                  # Use this for the simulator
-#from robomaster.robot import Robot                             # Use this for real robot
+# from tilsdk.mock_robomaster.robot import Robot                  # Use this for the simulator
+from robomaster.robot import Robot                             # Use this for real robot
 
 # Import your code
-from cv_service import CVService
+from cv_service import CVService, MockCVService
 from nlp_service import NLPService
 from planner import AStarPlanner
 
@@ -18,11 +18,11 @@ logging.basicConfig(level=logging.INFO,
 
 # Define config variables in an easily accessible location
 # You may consider using a config file
-REACHED_THRESHOLD_M = 0.2
+REACHED_THRESHOLD_M = 0.3
 ANGLE_THRESHOLD_DEG = 20.0
-ROBOT_RADIUS_M = 0.2
+ROBOT_RADIUS_M = 0.17
 NLP_MODEL_DIR = 'models/nlp_model.onnx'
-CV_MODEL_DIR = 'models/cv_model.onnx'
+CV_MODEL_DIR = 'models/yolov4.onnx'
 
 # Convenience function to update locations of interest.
 def update_locations(old:List[RealLocation], new:List[RealLocation]) -> None:
@@ -35,11 +35,11 @@ def update_locations(old:List[RealLocation], new:List[RealLocation]) -> None:
 
 def main():
     # Initialize services
-    # cv_service = CVService(model_dir=CV_MODEL_DIR)
-    cv_service = MockCVService(model_dir=CV_MODEL_DIR)
+    cv_service = CVService(model_dir=CV_MODEL_DIR)
+    # cv_service = MockCVService(model_dir=CV_MODEL_DIR)
     nlp_service = NLPService(model_dir=NLP_MODEL_DIR)
-    loc_service = LocalizationService()
-    rep_service = ReportingService(host='localhost', port='5566')
+    loc_service = LocalizationService(host='localhost', port=5566)
+    rep_service = ReportingService(host='localhost', port=5501)
     robot = Robot()
     robot.initialize(conn_type="ap")
     robot.camera.start_video_stream(display=False, resolution='720p')
@@ -60,12 +60,12 @@ def main():
     curr_wp:RealLocation = None
 
     # Initialize tracker
-    tracker = PIDController(Kp=(0.75, 0.5), Kd=(0.0, 0.1), Ki=(0.0, 0.0))
+    tracker = PIDController(Kp=(0.3, 0.23), Kd=(0.2, 0.05), Ki=(0.0, 0.0))
 
     # Initialize pose filter
     pose_filter = SimpleMovingAverage(n=5)
 
-    # Define filter function to exclude clues seen before
+    # Define filter function to exclude clues seen before   
     new_clues = lambda c: c.clue_id not in seen_clues
 
     # Main loop
