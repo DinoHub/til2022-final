@@ -23,7 +23,7 @@ class PriorityQueue:
         return heapq.heappop(self.elements)[1]
 
 
-class AStarPlanner:
+class Planner:
     def __init__(self, map_:SignedDistanceGrid=None, sdf_weight:float=0.0):
         '''
         Parameters
