@@ -77,21 +77,5 @@ Scoring will be done using the :ref:`reporting-service`. Reports contain the
 image seen by the robot and the detected target bounding box, and will be used
 to confirm that the detected target is correct.
 
-+----------------------------+--------+
-| Item                       | Score  |
-+============================+========+
-| Missed Target              | 0      |
-+----------------------------+--------+
-| Correctly reported target  | 1      |
-+----------------------------+--------+
-| Misreported target         | 0.5    |
-+----------------------------+--------+
-
-You will be ranked based on your final score. Only the event of a tie, a tie-breaker
-score will be calculated as follows:
-
-.. code-block::
-
-    score = number_of_reported_targets / (time_of_last_report - start_time)
-
-The team with the higher tie-breaker score will be ranked higher.
+.. tip::
+    For the detailed scoring, refer to the finals infopack.
