@@ -9,7 +9,7 @@ from robomaster.robot import Robot                             # Use this for re
 # Import your code
 from cv_service import CVService, MockCVService
 from nlp_service import NLPService
-from planner import AStarPlanner
+from planner import Planner
 
 # Setup logging in a nice readable format
 logging.basicConfig(level=logging.INFO,
@@ -50,7 +50,7 @@ def main():
     # Initialize planner
     map_:SignedDistanceGrid = loc_service.get_map()
     map_ = map_.dilated(1.5*ROBOT_RADIUS_M/map_.scale)
-    planner = AStarPlanner(map_, sdf_weight=0.5)
+    planner = Planner(map_, sdf_weight=0.5)
 
     # Initialize variables
     seen_clues = set()
