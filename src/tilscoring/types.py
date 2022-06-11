@@ -60,6 +60,7 @@ class Report:
             pt1 = (round(bbox.x-bbox.w/2), round(bbox.y-bbox.h/2))
             pt2 = (round(bbox.x+bbox.w/2), round(bbox.y+bbox.h/2))
             img = cv2.rectangle(self.image, pt1, pt2, color=color, thickness=thickness)
+            img = cv2.putText(img, '{}'.format(target.cls), pt1, cv2.FONT_HERSHEY_SIMPLEX, 1, color=color)
 
         return img
 
