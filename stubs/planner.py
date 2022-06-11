@@ -102,18 +102,10 @@ class Planner:
         cost_so_far[start] = 0
 
         while not frontier.is_empty():
-            current: GridLocation = frontier.get()
+            
+            # TODO: Participant to complete.
 
-            if current == goal:
-                break
-
-            for next, step_cost, sdf in self.map.neighbours(current):
-                new_cost = cost_so_far[current] + step_cost + self.sdf_weight*(1/(sdf))
-                if next not in cost_so_far or new_cost < cost_so_far[next]:
-                    cost_so_far[next] = new_cost
-                    priority = new_cost + self.heuristic(next, goal)
-                    frontier.put(next, priority)
-                    came_from[next] = current
+            pass
         
         if goal not in came_from:
             raise NoPathFoundException

@@ -18,11 +18,11 @@ logging.basicConfig(level=logging.INFO,
 
 # Define config variables in an easily accessible location
 # You may consider using a config file
-REACHED_THRESHOLD_M = 0.3
-ANGLE_THRESHOLD_DEG = 20.0
-ROBOT_RADIUS_M = 0.17
-NLP_MODEL_DIR = 'models/nlp_model.onnx'
-CV_MODEL_DIR = 'models/yolov4.onnx'
+REACHED_THRESHOLD_M = 0.3   # TODO: Participant may tune.
+ANGLE_THRESHOLD_DEG = 20.0  # TODO: Participant may tune.
+ROBOT_RADIUS_M = 0.17       # TODO: Participant may tune.
+NLP_MODEL_DIR = ''          # TODO: Participant to fill in.
+CV_MODEL_DIR = ''           # TODO: Participant to fill in.
 
 # Convenience function to update locations of interest.
 def update_locations(old:List[RealLocation], new:List[RealLocation]) -> None:
@@ -41,7 +41,7 @@ def main():
     loc_service = LocalizationService(host='localhost', port=5566)
     rep_service = ReportingService(host='localhost', port=5501)
     robot = Robot()
-    robot.initialize(conn_type="ap")
+    robot.initialize(conn_type="sta")
     robot.camera.start_video_stream(display=False, resolution='720p')
 
     # Start the run
@@ -60,7 +60,8 @@ def main():
     curr_wp:RealLocation = None
 
     # Initialize tracker
-    tracker = PIDController(Kp=(0.3, 0.23), Kd=(0.2, 0.05), Ki=(0.0, 0.0))
+    # TODO: Participant to tune PID controller values.
+    tracker = PIDController(Kp=(0.0, 0.0), Kd=(0.0, 0.0), Ki=(0.0, 0.0))
 
     # Initialize pose filter
     pose_filter = SimpleMovingAverage(n=5)
@@ -161,7 +162,9 @@ def main():
             else:
                 logging.getLogger('Navigation').info('End of path.')
                 curr_loi = None
-                # TODO: perform search?
+
+                # TODO: Perform search behaviour? Participant to complete.
+                
                 continue
 
     robot.chassis.drive_speed(x=0.0, y=0.0, z=0.0)  # set stop for safety
