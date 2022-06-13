@@ -93,6 +93,12 @@ def post_cmd_vel():
 
     return 'OK'
 
+@app.route('/start_run', methods=['GET'])
+def get_start_run():
+    logging.getLogger('/start_run').info('Run started.')
+    
+    return 'OK'
+
 @app.route('/report', methods=['POST'])
 def post_report():
     data =  flask.request.get_json()
