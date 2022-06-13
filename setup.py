@@ -33,7 +33,8 @@ setuptools.setup(
         'pyyaml >= 5.3',
         'librosa >= 0.9.1',
         'tensorflow >= 2.8.0',
-        'termcolor'
+        'termcolor',
+        'flask'
     ],
     entry_points = {
         'console_scripts': [
