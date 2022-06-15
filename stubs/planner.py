@@ -1,3 +1,4 @@
+from queue import PriorityQueue
 from typing import List, Tuple, TypeVar, Dict
 from tilsdk.localization import *
 import heapq
@@ -6,6 +7,20 @@ T = TypeVar('T')
 
 class NoPathFoundException(Exception):
     pass
+
+
+class PriorityQueue:
+    def __init__(self):
+        self.elements: List[Tuple[float, T]] = []
+
+    def is_empty(self) -> bool:
+        return not self.elements
+
+    def put(self, item: T, priority: float):
+        heapq.heappush(self.elements, (priority, item))
+
+    def get(self) -> T:
+        return heapq.heappop(self.elements)[1]
 
 
 class Planner:
@@ -24,6 +39,18 @@ class Planner:
     def update_map(self, map:SignedDistanceGrid):
         '''Update planner with new map.'''
         self.map = map
+
+    def heuristic(self, a:GridLocation, b:GridLocation) -> float:
+        '''Planning heuristic function.
+        
+        Parameters
+        ----------
+        a: GridLocation
+            Starting location.
+        b: GridLocation
+            Goal location.
+        '''
+        return euclidean_distance(a, b)
 
     def plan(self, start:RealLocation, goal:RealLocation) -> List[RealLocation]:
         '''Plan in real coordinates.
@@ -67,5 +94,36 @@ class Planner:
         if not self.map:
             raise RuntimeError('Planner map is not initialized.')
 
-        # TODO: Participant to complete.
+        # TODO: Participant to complete
         pass
+
+    def reconstruct_path(self,
+                         came_from:Dict[GridLocation, GridLocation],
+                         start:GridLocation, goal:GridLocation) -> List[GridLocation]:
+        '''Traces traversed locations to reconstruct path.
+        
+        Parameters
+        ----------
+        came_from: dict
+            Dictionary mapping location to location the planner came from.
+        start: GridLocation
+            Start location for path.
+        goal: GridLocation
+            Goal location for path.
+
+        Returns
+        -------
+        path
+            List of GridLocation from start to goal.
+        '''
+        
+        current: GridLocation = goal
+        path: List[GridLocation] = []
+        
+        while current != start:
+            path.append(current)
+            current = came_from[current]
+            
+        # path.append(start)
+        path.reverse()
+        return path
